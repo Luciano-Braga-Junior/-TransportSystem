@@ -1,0 +1,72 @@
+﻿@page "/transporte"
+@using Frontend.Model.Request
+
+<h3>Calcular Frete</h3>
+<EditForm Model="_carga" OnValidSubmit="CalcularFrete">
+    <DataAnnotationsValidator />
+    <div class="row">
+        <div class="col-4">
+            <label>Distância (km)</label>
+            <InputNumber @bind-Value="_carga.DistanciaEmKm" class="form-control" />
+            <ValidationMessage For="() => _carga.DistanciaEmKm" />
+        </div>
+        <div class="col-4">
+            <label>Peso (kg)</label>
+            <InputNumber @bind-Value="_carga.PesoEmKg" class="form-control" />
+            <ValidationMessage For="() => _carga.PesoEmKg" />
+        </div>
+        <div class="col-4">
+            <label>Largura (cm)</label>
+            <InputNumber @bind-Value="_carga.Largura" class="form-control" />
+            <ValidationMessage For="() => _carga.Largura" />
+        </div>
+        <div class="col-4">
+            <label>Altura (cm)</label>
+            <InputNumber @bind-Value="_carga.Altura" class="form-control" />
+            <ValidationMessage For="() => _carga.Altura" />
+        </div>
+        <div class="col-4">
+            <label>Comprimento (cm)</label>
+            <InputNumber @bind-Value="_carga.Comprimento" class="form-control" />
+            <ValidationMessage For="() => _carga.Comprimento" />
+        </div>
+    </div>
+    <button type="submit" class="btn btn-outline-primary mt-2">Calcular Frete</button>
+</EditForm>
+
+@if (_custoFrete.HasValue)
+{
+    <p>O custo do frete é: @_custoFrete.Value.ToString("C")</p>
+}
+
+@code {
+    private CargaRequest _carga = new();
+    private double? _custoFrete;
+    private bool _exibirCustoFrete = false;
+
+    private async Task CalcularFrete()
+    {
+        // Lembre-se sempre de alterar a URL da API para a URL correta. Use o Swagger para verificar a URL.
+        var apiUrl = $"https://localhost:7157/api/carga";
+        var http = new HttpClient();
+
+        try
+        {
+            // Faça um HTTP POST para a API passando os dados da carga. O retorno é um valor double representando o custo do frete.
+            var response = await http.PostAsJsonAsync(apiUrl, _carga);
+            response.EnsureSuccessStatusCode();
+            _custoFrete = await response.Content.ReadFromJsonAsync<double>();
+
+            // Verifica se existe um valor para o custo do frete. Se existir, exibe-o.
+            if (_custoFrete.HasValue)
+            {
+                _exibirCustoFrete = true;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+}
