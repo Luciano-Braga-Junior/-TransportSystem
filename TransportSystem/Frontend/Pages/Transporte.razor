@@ -1,5 +1,6 @@
 ﻿@page "/transporte"
 @using Frontend.Model.Request
+@using Frontend.Model.Response
 
 <h3>Calcular Frete</h3>
 <EditForm Model="_carga" OnValidSubmit="CalcularFrete">
@@ -34,32 +35,29 @@
     <button type="submit" class="btn btn-outline-primary mt-2">Calcular Frete</button>
 </EditForm>
 
-@if (_custoFrete.HasValue)
+@if (_exibirCustoFrete)
 {
-    <p>O custo do frete é: @_custoFrete.Value.ToString("C")</p>
+    <p>Custo do Frete: @_custoFreteResponse.CustoFrete</p>
 }
 
 @code {
-    private CargaRequest _carga = new();
-    private double? _custoFrete;
+    private CargaRequest _carga { get; set; } = new();
+    private CustoFreteResponse _custoFreteResponse { get; set; } = new();
     private bool _exibirCustoFrete = false;
 
     private async Task CalcularFrete()
     {
-        // Lembre-se sempre de alterar a URL da API para a URL correta. Use o Swagger para verificar a URL.
-        var apiUrl = $"https://localhost:7157/api/carga";
+        // URL da API
+        var apiUrl = $"https://localhost:7231/Transporte/calcular";
         var http = new HttpClient();
 
         try
         {
-            // Faça um HTTP POST para a API passando os dados da carga. O retorno é um valor double representando o custo do frete.
-            var response = await http.PostAsJsonAsync(apiUrl, _carga);
-            response.EnsureSuccessStatusCode();
-            _custoFrete = await response.Content.ReadFromJsonAsync<double>();
+            var response = await http.GetFromJsonAsync<CustoFreteResponse>(apiUrl);
 
-            // Verifica se existe um valor para o custo do frete. Se existir, exibe-o.
-            if (_custoFrete.HasValue)
+            if (response != null)
             {
+                _custoFreteResponse = response;
                 _exibirCustoFrete = true;
             }
         }

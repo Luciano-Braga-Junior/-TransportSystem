@@ -18,5 +18,6 @@ namespace Frontend.Model.Request
 
         [Required(ErrorMessage = "Informar o comprimento é obrigatório!")]
         public double Comprimento { get; set; }
+        public double CustoFrete { get; set; }
     }
 }
